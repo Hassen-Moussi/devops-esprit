@@ -1,0 +1,64 @@
+pipeline {
+    agent any
+
+					tools {
+						maven "MAVEN"
+					}
+    environment {
+    }
+    stages {
+
+        stage('Checkout') {
+            steps {
+                // Clones the Git repository of the project
+                git url: 'https://github.com/AbirHza/CRUDEtudiant_Using_SPRINGFramework', branch: 'master'
+
+            }
+        }
+
+
+						stage('Stage 2 - Compile Code') {
+							steps {
+								//cmd to compile the code
+                                sh "mvn compile"
+                                //sh "mvn compile"
+							}
+						}
+        // stage('Build Artifact - Maven') {
+        //     steps {
+        //         sh "mvn clean package -DskipTests=true"
+        //     }
+        // }
+
+
+
+                stage('hdhfdifn ') {
+            steps {
+               sh "mvn clean verify -DskipTests sonar:sonar  -Dsonar.projectKey=devops-esprit  -Dsonar.host.url=http://localhost:9000 -Dsonar.login=sqp_794727e7702fcc07bf735c3e4d44f07708431568"
+
+            }
+        }
+
+                stage('Archive JAR') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+                stage('Deploy to GitHub Packages') {
+            steps {
+                sh 'mvn deploy -DskipTests=true'
+            }
+        }
+
+
+    }
+
+    post {
+        failure {
+            echo 'Build failed!'
+        }
+        success {
+            echo 'Build succeeded!'
+        }
+    }
+}
